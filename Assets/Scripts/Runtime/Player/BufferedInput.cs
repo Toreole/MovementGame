@@ -35,7 +35,17 @@ namespace MovementGame.Input
         }
 
         /// <summary>
-        /// Try to consume the input. 
+        /// checks: active && Time.time - activeTime >= bufferDuration;
+        /// </summary>
+        public bool Get() => active && Time.time - activeTime >= bufferDuration;
+
+        /// <summary>
+        /// Consumes the buffered input.
+        /// </summary>
+        public void Consume() => active = false;
+
+        /// <summary>
+        /// Try to consume the input. Always resets activeInput to false when requirements are met.
         /// </summary>
         /// <returns>true when input is activated and in an acceptable timeframe.</returns>
         public bool TryConsume()

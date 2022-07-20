@@ -1,18 +1,60 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
+using MovementGame.Input;
 
-public class PlayerController : MonoBehaviour
+namespace MovementGame.Player
 {
-    // Start is called before the first frame update
-    void Start()
+    /// <summary>
+    /// The PlayerController for this game.
+    /// </summary>
+    public class PlayerController : StateMachineBehaviour<PlayerController, PlayerEvents>
     {
-        
+        private void Update()
+        {
+            ActiveState = ActiveState.OnMoveNext(this);
+        }
+
+        private void FixedUpdate()
+        {
+            ActiveState.OnFixedUpdate(this);
+        }
     }
 
-    // Update is called once per frame
-    void Update()
+    public enum PlayerEvents
     {
-        
+        NONE = 0,
+        /// <summary>
+        /// Called when entering ground.
+        /// args: otherCollider, groundNormal
+        /// </summary>
+        OnEnterGround = 1,
+
+        /// <summary>
+        /// Called when leaving ground.
+        /// </summary>
+        OnExitGround = 2,
+
+        /// <summary>
+        /// Called when input is disabled.
+        /// </summary>
+        OnLostControl = 3,
+
+        /// <summary>
+        /// Called when input is enabled.
+        /// </summary>
+        OnGainedControl = 4,
+
+        /// <summary>
+        /// Called when the game is paused.
+        /// </summary>
+        OnPause = 5,
+
+        /// <summary>
+        /// Called when the game is resumed.
+        /// </summary>
+        OnResume = 6,
+
     }
 }
