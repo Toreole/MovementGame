@@ -27,7 +27,7 @@
                     "name": "crouch",
                     "type": "Value",
                     "id": "ca348384-2fa2-4bda-8a9d-ce704110b0c8",
-                    "expectedControlType": "Button",
+                    "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": true
@@ -36,7 +36,7 @@
                     "name": "sprint",
                     "type": "Value",
                     "id": "5f66fec3-7ab2-4381-bf1f-935e600d864b",
-                    "expectedControlType": "Button",
+                    "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": true
@@ -45,6 +45,15 @@
                     "name": "jump",
                     "type": "Button",
                     "id": "86a7b847-741d-446f-8a97-d041d16a85c1",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "pause",
+                    "type": "Button",
+                    "id": "7b1be175-a14a-4416-a450-b9b77b93c212",
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": "",
@@ -192,6 +201,17 @@
                     "processors": "",
                     "groups": "mouse_keyboard",
                     "action": "jump",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "a645a834-3bd8-4f2d-aa58-8164a2f7db17",
+                    "path": "<Keyboard>/escape",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "mouse_keyboard",
+                    "action": "pause",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

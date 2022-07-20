@@ -12,7 +12,7 @@ namespace MovementGame
         /// <summary>
         /// Fixed Update
         /// </summary>
-        void OnFixedUpdate(TOwner o);
+        void OnUpdate(TOwner o);
 
         /// <summary>
         /// The method that handles transitions to other states.
@@ -38,7 +38,7 @@ namespace MovementGame
     {
         public void OnEvent(TOwner o, TEvents e, params object[] args) { }
 
-        public void OnFixedUpdate(TOwner o) { }
+        public void OnUpdate(TOwner o) { }
 
         public void OnStateEnter(TOwner o) { }
 

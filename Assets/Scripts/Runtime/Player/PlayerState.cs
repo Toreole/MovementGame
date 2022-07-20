@@ -14,7 +14,7 @@ namespace MovementGame.Player
         /// <inheritdocs />
         public abstract void OnEvent(PlayerController o, PlayerEvents e, params object[] args);
 
-        public abstract void OnFixedUpdate(PlayerController o);
+        public abstract void OnUpdate(PlayerController o);
 
         public abstract IStateBehaviour<PlayerController, PlayerEvents> OnMoveNext(PlayerController o);
 
