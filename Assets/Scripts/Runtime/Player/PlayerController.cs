@@ -43,6 +43,10 @@ namespace MovementGame.Player
         private float rotationSpeed = 20f;
         [SerializeField]
         private float cameraMinRot = -80f, cameraMaxRot = 80f;
+        [SerializeField]
+        private float crouchTransTime = 0.15f;
+        [SerializeField]
+        private AnimationCurve crouchTransCurve;
 
         //--Input
         [SerializeField]
@@ -91,7 +95,7 @@ namespace MovementGame.Player
                     {
                         CharacterController.height = Height;
                         CharacterController.center = new Vector3(0, Height * 0.5f, 0);
-                        CameraTransform.localPosition = new Vector3(0, Height - 0.15f);
+                        //CameraTransform.localPosition = new Vector3(0, Height - 0.15f);
                         isCrouching = value;
                     }
                 }
@@ -99,7 +103,7 @@ namespace MovementGame.Player
                 {
                     CharacterController.height = CrouchHeight;
                     CharacterController.center = new Vector3(0, CrouchHeight * 0.5f, 0);
-                    CameraTransform.localPosition = new Vector3(0, CrouchHeight - 0.15f);
+                    //CameraTransform.localPosition = new Vector3(0, CrouchHeight - 0.15f);
                     isCrouching = value;
                 }
             }
@@ -141,6 +145,7 @@ namespace MovementGame.Player
 
         private void Update()
         {
+            AnimateCamera();
             ActiveState.OnUpdate(this);
             ActiveState = ActiveState.OnMoveNext(this);
         }
@@ -192,6 +197,21 @@ namespace MovementGame.Player
         /// Moves according to .Velocity.
         /// </summary>
         internal void Move() => Move(Velocity * Time.deltaTime);
+
+        /// <summary>
+        /// Animates the camera in local space, essentially smoothes between the two heights when crouching.
+        /// </summary>
+        private void AnimateCamera()
+        {
+            float targetHeight = (IsCrouching? crouchHeight : height) - 0.15f;
+            float fromHeight = (IsCrouching ? height : crouchHeight) - 0.15f;
+            Vector3 pos = cameraTransform.localPosition;
+            float il = Mathf.InverseLerp(fromHeight, targetHeight, pos.y);
+            il += Time.deltaTime / crouchTransTime;
+            float cv = crouchTransCurve.Evaluate(il);
+            pos.y = Mathf.Lerp(fromHeight, targetHeight, cv);
+            cameraTransform.localPosition = pos;
+        }
 
         //--Input Messages
 
