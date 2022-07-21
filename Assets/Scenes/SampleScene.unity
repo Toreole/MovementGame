@@ -978,8 +978,12 @@ MonoBehaviour:
   height: 2
   crouchHeight: 1
   stickyness: 0.29
+  jumpHeight: 1.5
+  gravity: 10
   cameraTransform: {fileID: 963194228}
   rotationSpeed: 15
+  cameraMinRot: -80
+  cameraMaxRot: 80
   jumpInput:
     bufferDuration: 0.2
 --- !u!143 &905315005
@@ -997,7 +1001,7 @@ CharacterController:
   m_Radius: 0.4
   m_SlopeLimit: 45
   m_StepOffset: 0.3
-  m_SkinWidth: 0.08
+  m_SkinWidth: 0.09
   m_MinMoveDistance: 0.001
   m_Center: {x: 0, y: 1, z: 0}
 --- !u!4 &905315006

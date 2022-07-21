@@ -29,12 +29,18 @@ namespace MovementGame.Player
         private float crouchHeight;
         [SerializeField, Tooltip("How much to stick to surfaces while grounded")]
         private float stickyness = 1f;
+        [SerializeField]
+        private float jumpHeight = 1.5f;
+        [SerializeField]
+        private float gravity = 10f;
 
         [Header("Camera")]
         [SerializeField]
         private Transform cameraTransform;
         [SerializeField]
         private float rotationSpeed = 20f;
+        [SerializeField]
+        private float cameraMinRot = -80f, cameraMaxRot = 80f;
 
         //--Input
         [SerializeField]
@@ -49,8 +55,10 @@ namespace MovementGame.Player
         internal Vector2 MoveInput => moveInput;
         internal bool SprintInput => sprintInput;
         internal bool CrouchInput => crouchInput;
+        internal BufferedInput JumpInput => jumpInput;
+        public Vector2 MouseInput => mouseInput;
 
-        //other properties for states.
+        //properties for reading settings.
         internal CharacterController CharacterController => characterController;
         internal Transform CameraTransform => cameraTransform;
         internal float MoveSpeed => moveSpeed;
@@ -59,9 +67,12 @@ namespace MovementGame.Player
         internal float Stickyness => stickyness;
         internal float Height => height;
         internal float CrouchHeight => crouchHeight;
-
-
-        internal BufferedInput JumpInput => jumpInput;
+        internal float CameraMinRot => cameraMinRot;
+        internal float CameraMaxRot => cameraMaxRot;
+        internal float RotationSpeed => rotationSpeed;
+        internal float JumpVelocity { get; private set; }
+        internal float Gravity => gravity;
+        internal Vector3 LastGroundPos { get; private set; }
 
         //runtime variables
         private float cameraRotation = 0;
@@ -70,26 +81,44 @@ namespace MovementGame.Player
 
         internal bool IsGrounded => isGrounded;
 
+        /// <summary>
+        /// The current angle of the camera on the local X axis. Setting this property applies the value to the cameraTransform.
+        /// </summary>
+        internal float CameraRotation 
+        { 
+            get => cameraRotation; 
+            set 
+            { 
+                cameraRotation = value; 
+                cameraTransform.localRotation = Quaternion.Euler(cameraRotation, 0, 0); 
+            } 
+        }
+
+        /// <summary>
+        /// A buffer for the current velocity. Does not do anything in particular.
+        /// </summary>
+        internal Vector3 Velocity { get; set; } = Vector3.zero;
+
         //--Unity Messages
 
         private void Start()
         {
+            JumpVelocity = Mathf.Sqrt(jumpHeight * (2.0f * gravity));
             ActiveState = new PlayerGroundedState();
         }
 
         private void Update()
         {
-            transform.localRotation *= Quaternion.Euler(0, rotationSpeed * mouseInput.x * Time.deltaTime, 0);
-
-            cameraRotation = Mathf.Clamp(cameraRotation + rotationSpeed * -mouseInput.y * Time.deltaTime, -90f, 90f);
-            cameraTransform.localRotation = Quaternion.Euler(cameraRotation, 0, 0);
-
             ActiveState.OnUpdate(this);
             ActiveState = ActiveState.OnMoveNext(this);
         }
 
-        private void FixedUpdate()
+        private void OnDrawGizmos()
         {
+            var pos = transform.position;
+            Debug.DrawLine(pos, pos + Velocity, Color.red);
+            pos += new Vector3(0, Height, 0);
+            Debug.DrawLine(pos, pos + Velocity, Color.red);
         }
 
         //--Checks
@@ -109,6 +138,11 @@ namespace MovementGame.Player
         internal void Move(Vector3 mv)
         {
             CollisionFlags fl = characterController.Move(mv);
+            //handle hitting your head on the ceiling while jumping
+            if(fl.HasFlag(CollisionFlags.Above))
+                ActiveState.OnEvent(this, PlayerEvents.OnHitCeiling);
+
+            //ground
             bool ground = fl.HasFlag(CollisionFlags.Below);
             //handle enter and exist ground.
             if (ground && !isGrounded)
@@ -116,7 +150,14 @@ namespace MovementGame.Player
             else if (!ground && isGrounded)
                 ActiveState.OnEvent(this, PlayerEvents.OnExitGround);
             isGrounded = ground;
+            if (isGrounded)
+                LastGroundPos = transform.position;
         }
+
+        /// <summary>
+        /// Moves according to .Velocity.
+        /// </summary>
+        internal void Move() => Move(Velocity * Time.deltaTime);
 
         //--Input Messages
 
@@ -178,6 +219,11 @@ namespace MovementGame.Player
         /// <summary>
         /// Called when input is enabled.
         /// </summary>
-        OnGainedControl = 4
+        OnGainedControl = 4,
+
+        /// <summary>
+        /// Called when you jump into the ceiling. (CollisionFlag.Above)
+        /// </summary>
+        OnHitCeiling = 5
     }
 }

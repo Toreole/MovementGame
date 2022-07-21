@@ -34,6 +34,8 @@ namespace MovementGame.Player
                 isCrouching = false;
             }
 
+            ApplyDefaultCameraRotation(o);
+
             //ground movement.
             Vector3 fwDir = o.transform.forward;
             Vector3 swDir = o.transform.right;
@@ -41,20 +43,29 @@ namespace MovementGame.Player
             Vector2 input = Vector2.ClampMagnitude(o.MoveInput, 1f);
 
             Vector3 move = fwDir * input.y + swDir * input.x;
-            move *= (Time.deltaTime * (isCrouching ? o.CrouchSpeed : o.MoveSpeed));
+            move *= (isCrouching ? o.CrouchSpeed : o.MoveSpeed);
+
+            //set the velocity buffer.
+            o.Velocity = move;
+
             move.y = -o.Stickyness;
 
-            o.Move(move);
+            o.Move(move * Time.deltaTime);
         }
 
         public override IStateBehaviour<PlayerController, PlayerEvents> OnMoveNext(PlayerController o)
         {
             if (o.IsGrounded == false)
-                return new EmptyState<PlayerController, PlayerEvents>();
+                return new PlayerFallingState();
+            if(o.JumpInput)
+            {
+                o.JumpInput.Consume();
+                return new PlayerJumpingState();
+            }
             return this;
         }
 
-        public override void OnStateEnter(PlayerController o)
+        public override void OnStateEnter(PlayerController o, IStateBehaviour<PlayerController, PlayerEvents> previous)
         {
             Debug.Log("Grounded State");
         }

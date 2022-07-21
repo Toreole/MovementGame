@@ -35,9 +35,9 @@ namespace MovementGame.Input
         }
 
         /// <summary>
-        /// checks: active && Time.time - activeTime >= bufferDuration;
+        /// checks: active && Time.time - activeTime <= bufferDuration;
         /// </summary>
-        public bool Get() => active && Time.time - activeTime >= bufferDuration;
+        public bool Get() => active && Time.time - activeTime <= bufferDuration;
 
         /// <summary>
         /// Consumes the buffered input.
@@ -50,7 +50,7 @@ namespace MovementGame.Input
         /// <returns>true when input is activated and in an acceptable timeframe.</returns>
         public bool TryConsume()
         {
-            if (active && Time.time - activeTime >= bufferDuration)
+            if (active && Time.time - activeTime <= bufferDuration)
             {
                 active = false;
                 return true;
@@ -61,7 +61,7 @@ namespace MovementGame.Input
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator bool(BufferedInput input)
         {
-            return input.TryConsume();
+            return input.Get();
         }
     }
 }

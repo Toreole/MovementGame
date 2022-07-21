@@ -13,8 +13,8 @@ namespace MovementGame
             {
                 if (activeState != value)
                 {
+                    value.OnStateEnter(this as TClass, activeState);
                     activeState = value;
-                    value.OnStateEnter(this as TClass);
                 }
             }
         }

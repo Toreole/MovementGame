@@ -7,10 +7,10 @@ namespace MovementGame
         /// <summary>
         /// Call when this state is set as active in a StateMachine.
         /// </summary>
-        void OnStateEnter(TOwner o);
+        void OnStateEnter(TOwner o, IStateBehaviour<TOwner, TEvents> previous);
 
         /// <summary>
-        /// Fixed Update
+        /// Update
         /// </summary>
         void OnUpdate(TOwner o);
 
@@ -40,7 +40,7 @@ namespace MovementGame
 
         public void OnUpdate(TOwner o) { }
 
-        public void OnStateEnter(TOwner o) { }
+        public void OnStateEnter(TOwner o, IStateBehaviour<TOwner, TEvents> previous) { }
 
         public IStateBehaviour<TOwner, TEvents> OnMoveNext(TOwner o) => this;
     }

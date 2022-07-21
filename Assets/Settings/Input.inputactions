@@ -75,7 +75,7 @@
                 {
                     "name": "Composite_2d_axis",
                     "id": "bdc942e7-ab52-48d8-b5f8-e830bdb4f3ac",
-                    "path": "2DVector",
+                    "path": "2DVector(mode=2)",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
