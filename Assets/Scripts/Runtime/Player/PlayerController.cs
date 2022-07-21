@@ -17,6 +17,10 @@ namespace MovementGame.Player
         [SerializeField]
         private float moveSpeed = 2f;
         [SerializeField]
+        private float crouchSpeed = 1.4f;
+        [SerializeField]
+        private float sprintSpeed = 3.4f;
+        [SerializeField]
         private LayerMask collisionMask;
 
         [SerializeField]
@@ -48,12 +52,23 @@ namespace MovementGame.Player
 
         //other properties for states.
         internal CharacterController CharacterController => characterController;
+        internal Transform CameraTransform => cameraTransform;
         internal float MoveSpeed => moveSpeed;
+        internal float CrouchSpeed => crouchSpeed;
+        internal float SprintSpeed => sprintSpeed;
+        internal float Stickyness => stickyness;
+        internal float Height => height;
+        internal float CrouchHeight => crouchHeight;
+
 
         internal BufferedInput JumpInput => jumpInput;
 
         //runtime variables
-        float cameraRotation = 0;
+        private float cameraRotation = 0;
+
+        private bool isGrounded = true;
+
+        internal bool IsGrounded => isGrounded;
 
         //--Unity Messages
 
@@ -64,24 +79,10 @@ namespace MovementGame.Player
 
         private void Update()
         {
-            if(crouchInput) //TODO: Smoothing
-            {
-                characterController.height = crouchHeight;
-                characterController.center = new Vector3(0, crouchHeight * 0.5f, 0);
-                cameraTransform.localPosition = new Vector3(0, crouchHeight - 0.15f);
-            }
-            else if(HasHeadClearence())
-            {
-                characterController.height = height;
-                characterController.center = new Vector3(0, height * 0.5f, 0);
-                cameraTransform.localPosition = new Vector3(0, height - 0.15f);
-            }
-
             transform.localRotation *= Quaternion.Euler(0, rotationSpeed * mouseInput.x * Time.deltaTime, 0);
 
             cameraRotation = Mathf.Clamp(cameraRotation + rotationSpeed * -mouseInput.y * Time.deltaTime, -90f, 90f);
             cameraTransform.localRotation = Quaternion.Euler(cameraRotation, 0, 0);
-
 
             ActiveState.OnUpdate(this);
             ActiveState = ActiveState.OnMoveNext(this);
@@ -92,12 +93,29 @@ namespace MovementGame.Player
         }
 
         //--Checks
-        private bool HasHeadClearence()
+        internal bool HasHeadClearence()
         {
             bool b = Physics.Raycast(transform.position + new Vector3(0, 0.05f), transform.up, out RaycastHit hit, height, collisionMask);
-            if (b)
-                Debug.Log($"hit col: {hit.collider.GetType().Name}", hit.collider);
+            //if (b)
+            //    Debug.Log($"hit col: {hit.collider.GetType().Name}", hit.collider);
             return !b;
+        }
+
+        /// <summary>
+        /// Moves the character controller with the specified vector.
+        /// Handles grounded state.
+        /// </summary>
+        /// <param name="mv">Movement Vector</param>
+        internal void Move(Vector3 mv)
+        {
+            CollisionFlags fl = characterController.Move(mv);
+            bool ground = fl.HasFlag(CollisionFlags.Below);
+            //handle enter and exist ground.
+            if (ground && !isGrounded)
+                ActiveState.OnEvent(this, PlayerEvents.OnEnterGround);
+            else if (!ground && isGrounded)
+                ActiveState.OnEvent(this, PlayerEvents.OnExitGround);
+            isGrounded = ground;
         }
 
         //--Input Messages
@@ -141,9 +159,9 @@ namespace MovementGame.Player
     public enum PlayerEvents
     {
         NONE = 0,
+
         /// <summary>
         /// Called when entering ground.
-        /// args: otherCollider, groundNormal
         /// </summary>
         OnEnterGround = 1,
 
@@ -160,17 +178,6 @@ namespace MovementGame.Player
         /// <summary>
         /// Called when input is enabled.
         /// </summary>
-        OnGainedControl = 4,
-
-        /// <summary>
-        /// Called when the game is paused.
-        /// </summary>
-        OnPause = 5,
-
-        /// <summary>
-        /// Called when the game is resumed.
-        /// </summary>
-        OnResume = 6,
-
+        OnGainedControl = 4
     }
 }
