@@ -26,6 +26,7 @@ namespace MovementGame.Player
         {
             ApplyDefaultCameraRotation(o);
             ApplyGravity(o);
+            o.IsCrouching = false; //needs to be updated on a per-frame basis, just incase the fall started from a crouch position.
             o.Move();
         }
     }

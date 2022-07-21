@@ -3,26 +3,10 @@ using UnityEngine;
 
 namespace MovementGame.Player
 {
-    public class PlayerGroundedState : PlayerState
+    public class PlayerRunningState : PlayerGroundedState
     {
-        //tbh i dont really know anymore how useful this is if im gonna check everything in OnMoveNext anyway.
-        public override void OnEvent(PlayerController o, PlayerEvents e, params object[] args)
-        {
-
-        }
-
         public override void OnUpdate(PlayerController o)
         {
-            //crouch control via input is primarily controlled by the grounded state.
-            if (o.CrouchInput && !o.IsCrouching)
-            {
-                o.IsCrouching = true;
-            }
-            else if (!o.CrouchInput && o.IsCrouching) //stand back up
-            {
-                o.IsCrouching = false;
-            }
-
             ApplyDefaultCameraRotation(o);
 
             //ground movement.
@@ -32,7 +16,8 @@ namespace MovementGame.Player
             Vector2 input = Vector2.ClampMagnitude(o.MoveInput, 1f);
 
             Vector3 move = fwDir * input.y + swDir * input.x;
-            move *= (o.IsCrouching ? o.CrouchSpeed : o.MoveSpeed);
+
+            move *= o.SprintSpeed;
 
             //set the velocity buffer.
             o.Velocity = move;
@@ -44,10 +29,14 @@ namespace MovementGame.Player
 
         public override IStateBehaviour<PlayerController, PlayerEvents> OnMoveNext(PlayerController o)
         {
-            if (o.IsGrounded == false)
+            if (!o.IsGrounded)
                 return new PlayerFallingState();
-            if (o.SprintInput && !o.IsCrouching) //dont try running while crouching.
-                return new PlayerRunningState();
+            if(o.CrouchInput)
+            {
+                return new PlayerSlideState();
+            }
+            if (!o.SprintInput)
+                return new PlayerGroundedState();
             if(o.JumpInput)
             {
                 o.JumpInput.Consume();
@@ -58,7 +47,8 @@ namespace MovementGame.Player
 
         public override void OnStateEnter(PlayerController o, IStateBehaviour<PlayerController, PlayerEvents> previous)
         {
-
+            base.OnStateEnter(o, previous);
+            o.IsCrouching = false;
         }
     }
 }

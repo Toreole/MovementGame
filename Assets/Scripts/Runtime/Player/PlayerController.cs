@@ -21,6 +21,8 @@ namespace MovementGame.Player
         [SerializeField]
         private float sprintSpeed = 3.4f;
         [SerializeField]
+        private float slideDuration = 2f;
+        [SerializeField]
         private LayerMask collisionMask;
 
         [SerializeField]
@@ -73,11 +75,41 @@ namespace MovementGame.Player
         internal float JumpVelocity { get; private set; }
         internal float Gravity => gravity;
         internal Vector3 LastGroundPos { get; private set; }
+        internal float SlideDuration => slideDuration;
+
+        /// <summary>
+        /// Set checks value change, then automatically adjusts the height of the character controller.
+        /// </summary>
+        internal bool IsCrouching
+        {
+            get => isCrouching;
+            set
+            {
+                if(isCrouching && !value) //stop crouching
+                {
+                    if(HasHeadClearence())
+                    {
+                        CharacterController.height = Height;
+                        CharacterController.center = new Vector3(0, Height * 0.5f, 0);
+                        CameraTransform.localPosition = new Vector3(0, Height - 0.15f);
+                        isCrouching = value;
+                    }
+                }
+                else if (!isCrouching && value) //start crouching
+                {
+                    CharacterController.height = CrouchHeight;
+                    CharacterController.center = new Vector3(0, CrouchHeight * 0.5f, 0);
+                    CameraTransform.localPosition = new Vector3(0, CrouchHeight - 0.15f);
+                    isCrouching = value;
+                }
+            }
+        }
 
         //runtime variables
         private float cameraRotation = 0;
 
         private bool isGrounded = true;
+        private bool isCrouching = false;
 
         internal bool IsGrounded => isGrounded;
 
@@ -124,10 +156,12 @@ namespace MovementGame.Player
         //--Checks
         internal bool HasHeadClearence()
         {
-            bool b = Physics.Raycast(transform.position + new Vector3(0, 0.05f), transform.up, out RaycastHit hit, height, collisionMask);
-            //if (b)
-            //    Debug.Log($"hit col: {hit.collider.GetType().Name}", hit.collider);
-            return !b;
+            float radius = characterController.radius;
+            Vector3 pos = transform.position + new Vector3(0, radius + 0.05f);
+
+            if (Physics.SphereCast(new Ray(pos, Vector3.up), radius, height - radius * 2f, collisionMask))
+                return false;
+            return true;
         }
 
         /// <summary>

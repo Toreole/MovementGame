@@ -23,7 +23,7 @@ namespace MovementGame.Player
         public override void OnStateEnter(PlayerController o, IStateBehaviour<PlayerController, PlayerEvents> previous)
         {
             Vector3 vel = o.Velocity;
-            vel.y += o.JumpVelocity;
+            vel.y += o.JumpVelocity * (previous is PlayerRunningState? 1.1f : 1.0f);//running gives a small extra to jumping
             o.Velocity = vel;
         }
 

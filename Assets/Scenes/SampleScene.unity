@@ -970,15 +970,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   characterController: {fileID: 905315005}
   moveSpeed: 4
-  crouchSpeed: 2.5
+  crouchSpeed: 3
   sprintSpeed: 5.5
+  slideDuration: 0.8
   collisionMask:
     serializedVersion: 2
     m_Bits: 1
   height: 2
   crouchHeight: 1
   stickyness: 0.29
-  jumpHeight: 1.5
+  jumpHeight: 1.2
   gravity: 10
   cameraTransform: {fileID: 963194228}
   rotationSpeed: 15
@@ -1234,7 +1235,7 @@ Camera:
     y: 0
     width: 1
     height: 1
-  near clip plane: 0.3
+  near clip plane: 0.2
   far clip plane: 1000
   field of view: 60
   orthographic: 0
