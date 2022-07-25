@@ -170,6 +170,67 @@ namespace MovementGame.Player
         }
 
         /// <summary>
+        /// Checks if the character is looking at a wall (defined by near vertical collision at half height of the character)
+        /// </summary>
+        /// <returns></returns>
+        internal bool IsLookingAtWall()
+        {
+            Vector3 bodyCenter = transform.position + characterController.center;
+            Vector3 lookDirection = transform.forward;
+            float checkDistance = characterController.radius + 0.15f; //magic number alert
+            if(Physics.Raycast(bodyCenter, lookDirection, out RaycastHit hit, checkDistance, collisionMask))
+            {
+                //collision has been found, check the normal.
+                if(Vector3.Dot(lookDirection, hit.normal) <= -0.85f)
+                {
+                    return true;
+                }
+                //there is collision, but it is not recognized as a wall.
+                return false; 
+            }
+            //no collision found at all.
+            return false;
+        }
+
+        /// <summary>
+        /// Check if the wall/ledge youre standing in front of can be climbed.
+        /// </summary>
+        /// <returns></returns>
+        internal bool IsAtClimbableLedge(out Vector3 ledgeTop)
+        {
+            float verticalGrabDistance = 0.45f; //magic number
+            if(Velocity.sqrMagnitude > MoveSpeed*MoveSpeed && IsLookingAtWall())
+            {
+                verticalGrabDistance *= 1.45f; //another magic number
+            }
+            //the very top of the players head.
+            Vector3 headTopPos = transform.position + new Vector3(0, Height);
+            Vector3 downDirection = Vector3.down;
+            Vector3 lookDirection = transform.forward;
+            //the grabdistance (roughly arms length + modifiers from speed) + the character height.
+            float checkDistance = verticalGrabDistance + Height;
+
+            Vector3 checkOrigin = headTopPos + lookDirection * (characterController.radius + 0.15f) + new Vector3(0, verticalGrabDistance);
+
+            if(Physics.Raycast(checkOrigin, downDirection, out RaycastHit hit, checkDistance, collisionMask))
+            {
+                //the hit is valid ground
+                if(hit.normal.y > 0.8f)
+                {
+                    //validate vertical the offset.
+                    //must not be handled by the charactercontroller already -> greater offset than step limit.
+                    if(hit.point.y - transform.position.y > characterController.stepOffset)
+                    {
+                        ledgeTop = hit.point;
+                        return true;
+                    }
+                }
+            }
+            ledgeTop = Vector3.zero;
+            return false;
+        }
+
+        /// <summary>
         /// Moves the character controller with the specified vector.
         /// Handles grounded state.
         /// </summary>
@@ -180,7 +241,7 @@ namespace MovementGame.Player
             //handle hitting your head on the ceiling while jumping
             if(fl.HasFlag(CollisionFlags.Above))
                 ActiveState.OnEvent(this, PlayerEvents.OnHitCeiling);
-
+            
             //ground
             bool ground = fl.HasFlag(CollisionFlags.Below);
             //handle enter and exist ground.

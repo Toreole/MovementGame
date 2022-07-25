@@ -15,6 +15,8 @@ namespace MovementGame.Player
         {
             if (o.IsGrounded)
                 return new PlayerGroundedState();
+            if (o.IsLookingAtWall() && o.IsAtClimbableLedge(out Vector3 ltp))
+                return new PlayerLedgeClimbState(ltp);
             return this;
         }
     }
