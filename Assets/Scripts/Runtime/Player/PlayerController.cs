@@ -80,6 +80,7 @@ namespace MovementGame.Player
         internal float Gravity => gravity;
         internal Vector3 LastGroundPos { get; private set; }
         internal float SlideDuration => slideDuration;
+        internal int CollisionMask => collisionMask;
 
         /// <summary>
         /// Set checks value change, then automatically adjusts the height of the character controller.
@@ -114,6 +115,8 @@ namespace MovementGame.Player
 
         private bool isGrounded = true;
         private bool isCrouching = false;
+
+        private Collider[] colliderBuffer = new Collider[8];
 
         internal bool IsGrounded => isGrounded;
 
@@ -221,6 +224,13 @@ namespace MovementGame.Player
                     //must not be handled by the charactercontroller already -> greater offset than step limit.
                     if(hit.point.y - transform.position.y > characterController.stepOffset)
                     {
+                        //there is collision above it, oof.
+                        if(0 < Physics.OverlapSphereNonAlloc(hit.point + new Vector3(0, 0.3f), 0.15f, colliderBuffer, collisionMask))
+                        {
+                            ledgeTop = Vector3.zero;
+                            return false;
+                        }    
+                        //no collision, free to go.
                         ledgeTop = hit.point;
                         return true;
                     }

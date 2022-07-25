@@ -21,14 +21,19 @@ namespace MovementGame.Player
         }
         public override IStateBehaviour<PlayerController, PlayerEvents> OnMoveNext(PlayerController o)
         {
-            if (this.IsDone && o.IsGrounded)
+            if (this.IsDone) //&& o.IsGrounded // grounded check not needed as that is assumed.
+            {
+                
                 return new PlayerGroundedState();
+            }
             return this;
         }
 
         public override void OnStateEnter(PlayerController o, IStateBehaviour<PlayerController, PlayerEvents> previous)
         {
-            startPos = o.transform.position;
+            startPos = o.transform.position; 
+            if (Physics.Raycast(ledgeTopPos, Vector3.up, out RaycastHit hit, o.Height, o.CollisionMask))
+                o.IsCrouching = true;
         }
 
         public override void OnUpdate(PlayerController o)
