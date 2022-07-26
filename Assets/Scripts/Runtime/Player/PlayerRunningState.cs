@@ -40,6 +40,11 @@ namespace MovementGame.Player
             if(o.JumpInput)
             {
                 o.JumpInput.Consume();
+                if(o.IsNextToWall(out Vector3 n))
+                {
+                    Debug.Log("start wall run?");
+                    return new PlayerWallRunState(n);
+                }
                 return new PlayerJumpingState();
             }
             return this;

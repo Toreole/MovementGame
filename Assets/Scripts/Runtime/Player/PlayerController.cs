@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using MovementGame.Input;
+using System;
 
 namespace MovementGame.Player
 {
@@ -39,6 +40,7 @@ namespace MovementGame.Player
         [Header("Camera")]
         [SerializeField]
         private Transform cameraTransform;
+
         [SerializeField]
         private float rotationSpeed = 20f;
         [SerializeField]
@@ -192,6 +194,46 @@ namespace MovementGame.Player
                 return false; 
             }
             //no collision found at all.
+            return false;
+        }
+
+        internal bool IsLookingAtWall(out Vector3 normal)
+        {
+            Vector3 bodyCenter = transform.position + characterController.center;
+            Vector3 lookDirection = transform.forward;
+            float checkDistance = characterController.radius + 0.15f; //magic number alert
+            if (Physics.Raycast(bodyCenter, lookDirection, out RaycastHit hit, checkDistance, collisionMask))
+            {
+                normal = hit.normal;
+                //collision has been found, check the normal.
+                if (Vector3.Dot(lookDirection, hit.normal) <= -0.85f)
+                {
+                    return true;
+                }
+                //there is collision, but it is not recognized as a wall.
+                return false;
+            }
+            //no collision found at all.
+            normal = Vector3.zero;
+            return false;
+        }
+
+        internal bool IsNextToWall(out Vector3 normal)
+        {
+            Vector3 bodyCenter = transform.position + characterController.center;
+            Vector3 right = transform.right;
+
+            if(Physics.SphereCast(bodyCenter, characterController.radius, right, out RaycastHit hit, 0.15f, collisionMask))
+            {
+                normal = hit.normal;
+                return true;
+            }
+            if (Physics.SphereCast(bodyCenter, characterController.radius, -right, out hit, 0.15f, collisionMask))
+            {
+                normal = hit.normal;
+                return true;
+            }
+            normal = Vector3.zero;
             return false;
         }
 
